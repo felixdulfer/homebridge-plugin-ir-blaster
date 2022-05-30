@@ -8,18 +8,16 @@ import {
   Characteristic,
   UnknownContext,
 } from 'homebridge';
-
 import ping from 'ping';
+import { inspect } from 'util';
 
 import { PLATFORM_NAME, PLUGIN_NAME } from './settings';
-import { ExamplePlatformAccessory } from './platformAccessory';
+import { IrBlaster } from './IrBlaster';
 import {
-  LightbulbAccessoryConfig,
   LightbulbAccessory,
+  LightbulbAccessoryConfig,
   ILightbulbAccessoryContext,
 } from './platformLightbulb';
-import { IrBlaster } from './IrBlaster';
-import { inspect } from 'util';
 import {
   FanAccessory,
   FanAccessoryConfig,

@@ -3,7 +3,7 @@ import { Service, PlatformAccessory, CharacteristicValue } from 'homebridge';
 import { ExampleHomebridgePlatform } from './platform';
 import { IrBlaster } from './IrBlaster';
 
-interface ILightbulbAccessoryCommands {
+export interface ILightbulbAccessoryCommands {
   on: string;
   off: string;
 }

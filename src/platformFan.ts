@@ -3,7 +3,7 @@ import { Service, PlatformAccessory, CharacteristicValue } from 'homebridge';
 import { ExampleHomebridgePlatform } from './platform';
 import { IrBlaster } from './IrBlaster';
 
-interface IFanAccessoryCommands {
+export interface IFanAccessoryCommands {
   off: string;
   speed1: string;
   speed2: string;
