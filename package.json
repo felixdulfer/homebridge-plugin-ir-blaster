@@ -1,9 +1,8 @@
 {
-  "private": true,
-  "displayName": "Homebridge IR Blaster",
-  "name": "homebridge-plugin-ir-blaster",
+  "displayName": "Homebridge Plug-in IR Blaster",
+  "name": "@felixdulfer/homebridge-plugin-ir-blaster",
   "version": "1.0.0",
-  "description": "A short description about what your plugin does.",
+  "description": "Homebridge plug-in that transmits IR signals through a custom IR board.",
   "license": "Apache-2.0",
   "repository": {
     "type": "git",
@@ -42,5 +41,8 @@
     "rimraf": "^3.0.2",
     "ts-node": "^10.3.0",
     "typescript": "^4.4.4"
+  },
+  "publishConfig": {
+    "access": "public"
   }
 }
