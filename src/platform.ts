@@ -1,116 +1,187 @@
-import { API, DynamicPlatformPlugin, Logger, PlatformAccessory, PlatformConfig, Service, Characteristic } from 'homebridge';
+import {
+  API,
+  DynamicPlatformPlugin,
+  Logger,
+  PlatformAccessory,
+  PlatformConfig,
+  Service,
+  Characteristic,
+  UnknownContext,
+} from 'homebridge';
+
+import ping from 'ping';
 
 import { PLATFORM_NAME, PLUGIN_NAME } from './settings';
 import { ExamplePlatformAccessory } from './platformAccessory';
+import {
+  LightbulbAccessoryConfig,
+  LightbulbAccessory,
+  ILightbulbAccessoryContext,
+} from './platformLightbulb';
+import { IrBlaster } from './IrBlaster';
+import { inspect } from 'util';
+import {
+  FanAccessory,
+  FanAccessoryConfig,
+  IFanAccessoryContext,
+} from './platformFan';
+
+export type BlasterConfig = {
+  uniqueId: string;
+  displayName: string;
+  address: string;
+};
+
+interface IRBlasterPlatformConfig extends PlatformConfig {
+  blasters?: BlasterConfig[];
+  accessoires?: (LightbulbAccessoryConfig | FanAccessoryConfig)[];
+}
 
 /**
- * HomebridgePlatform
- * This class is the main constructor for your plugin, this is where you should
- * parse the user config and discover/register accessories with Homebridge.
+ * @todo platform should be using StaticPlatformPlugin?
  */
 export class ExampleHomebridgePlatform implements DynamicPlatformPlugin {
   public readonly Service: typeof Service = this.api.hap.Service;
-  public readonly Characteristic: typeof Characteristic = this.api.hap.Characteristic;
+  public readonly Characteristic: typeof Characteristic =
+    this.api.hap.Characteristic;
 
-  // this is used to track restored cached accessories
-  public readonly accessories: PlatformAccessory[] = [];
+  public readonly blasters: IrBlaster[] = [];
+  public readonly accessories: PlatformAccessory<{
+    irBlaster: IrBlaster;
+    commands: any;
+  }>[] = [];
 
   constructor(
     public readonly log: Logger,
-    public readonly config: PlatformConfig,
-    public readonly api: API,
+    public readonly config: IRBlasterPlatformConfig,
+    public readonly api: API
   ) {
-    this.log.debug('Finished initializing platform:', this.config.name);
+    this.log.debug('Finished initializing platform:', this.config);
 
-    // When this event is fired it means Homebridge has restored all cached accessories from disk.
-    // Dynamic Platform plugins should only register new accessories after this event was fired,
-    // in order to ensure they weren't added to homebridge already. This event can also be used
-    // to start discovery of new accessories.
+    this.blasters = (this.config.blasters ?? []).map(
+      (blasterConfig) => new IrBlaster(log, blasterConfig)
+    );
+
     this.api.on('didFinishLaunching', () => {
       log.debug('Executed didFinishLaunching callback');
-      // run the method to discover / register your devices as accessories
       this.discoverDevices();
     });
   }
 
-  /**
-   * This function is invoked when homebridge restores cached accessories from disk at startup.
-   * It should be used to setup event handlers for characteristics and update respective values.
-   */
-  configureAccessory(accessory: PlatformAccessory) {
+  configureAccessory(accessory: PlatformAccessory<any>) {
     this.log.info('Loading accessory from cache:', accessory.displayName);
-
-    // add the restored accessory to the accessories cache so we can track if it has already been registered
     this.accessories.push(accessory);
   }
 
-  /**
-   * This is an example method showing how to register discovered accessories.
-   * Accessories must only be registered once, previously created accessories
-   * must not be registered again to prevent "duplicate UUID" errors.
-   */
-  discoverDevices() {
+  async discoverIrBlasters() {
+    for (const blaster of this.blasters) {
+      this.log.debug('Discovering IR Blaster:', blaster.config.displayName);
 
-    // EXAMPLE ONLY
-    // A real plugin you would discover accessories from the local network, cloud services
-    // or a user-defined array in the platform config.
-    const exampleDevices = [
-      {
-        exampleUniqueId: 'ABCD',
-        exampleDisplayName: 'Bedroom',
-      },
-      {
-        exampleUniqueId: 'EFGH',
-        exampleDisplayName: 'Kitchen',
-      },
-    ];
+      const pingResponse = await ping.promise.probe(blaster.config.address, {
+        timeout: 60,
+      });
 
-    // loop over the discovered devices and register each one if it has not already been registered
-    for (const device of exampleDevices) {
+      if (!pingResponse.alive) {
+        throw new Error(
+          `IR Blaster at ${blaster.config.address} is not responding.`
+        );
+      }
 
-      // generate a unique id for the accessory this should be generated from
-      // something globally unique, but constant, for example, the device serial
-      // number or MAC address
-      const uuid = this.api.hap.uuid.generate(device.exampleUniqueId);
+      this.log.debug(
+        `Blaster at ${blaster.config.address} is alive (ping: ${pingResponse.avg}ms).`
+      );
+    }
+  }
 
-      // see if an accessory with the same uuid has already been registered and restored from
-      // the cached devices we stored in the `configureAccessory` method above
-      const existingAccessory = this.accessories.find(accessory => accessory.UUID === uuid);
+  async discoverDevices() {
+    await this.discoverIrBlasters();
+
+    for (const accessory of this.config.accessoires ?? []) {
+      this.log.debug(
+        'Accessory',
+        inspect(accessory, { depth: 0, colors: true })
+      );
+
+      const uuid = this.api.hap.uuid.generate(accessory.uniqueId);
+      const irBlaster = this.getBlasterByUniqueId(accessory.blaster.uniqueId);
+
+      const existingAccessory = this.accessories.find(
+        (accessory) => accessory.UUID === uuid
+      );
+
+      this.log.debug(
+        `Existing Accessory "${accessory.displayName}":`,
+        existingAccessory ? 'found' : 'not found'
+      );
 
       if (existingAccessory) {
-        // the accessory already exists
-        this.log.info('Restoring existing accessory from cache:', existingAccessory.displayName);
+        this.log.info(
+          'Restoring existing accessory from cache:',
+          existingAccessory.displayName
+        );
 
-        // if you need to update the accessory.context then you should run `api.updatePlatformAccessories`. eg.:
-        // existingAccessory.context.device = device;
-        // this.api.updatePlatformAccessories([existingAccessory]);
+        existingAccessory.context.irBlaster = irBlaster;
+        existingAccessory.context.commands = accessory.commands;
 
-        // create the accessory handler for the restored accessory
-        // this is imported from `platformAccessory.ts`
-        new ExamplePlatformAccessory(this, existingAccessory);
+        this.api.updatePlatformAccessories([existingAccessory]);
 
-        // it is possible to remove platform accessories at any time using `api.unregisterPlatformAccessories`, eg.:
-        // remove platform accessories when no longer present
-        // this.api.unregisterPlatformAccessories(PLUGIN_NAME, PLATFORM_NAME, [existingAccessory]);
-        // this.log.info('Removing existing accessory from cache:', existingAccessory.displayName);
+        switch (accessory.type) {
+          case 'Lightbulb': {
+            new LightbulbAccessory(this, existingAccessory);
+            break;
+          }
+          case 'Fan': {
+            new FanAccessory(this, existingAccessory);
+            break;
+          }
+        }
       } else {
-        // the accessory does not yet exist, so we need to create it
-        this.log.info('Adding new accessory:', device.exampleDisplayName);
+        this.log.info(
+          `Adding new ${accessory.type} accessory:`,
+          accessory.displayName
+        );
 
-        // create a new accessory
-        const accessory = new this.api.platformAccessory(device.exampleDisplayName, uuid);
+        const newAaccessory = new this.api.platformAccessory<UnknownContext>(
+          accessory.displayName,
+          uuid
+        );
 
-        // store a copy of the device object in the `accessory.context`
-        // the `context` property can be used to store any data about the accessory you may need
-        accessory.context.device = device;
+        newAaccessory.context.irBlaster = irBlaster;
+        newAaccessory.context.commands = accessory.commands;
 
-        // create the accessory handler for the newly create accessory
-        // this is imported from `platformAccessory.ts`
-        new ExamplePlatformAccessory(this, accessory);
+        switch (accessory.type) {
+          case 'Lightbulb': {
+            new LightbulbAccessory(
+              this,
+              newAaccessory as PlatformAccessory<ILightbulbAccessoryContext>
+            );
+            break;
+          }
+          case 'Fan': {
+            new FanAccessory(
+              this,
+              newAaccessory as PlatformAccessory<IFanAccessoryContext>
+            );
+            break;
+          }
+        }
 
-        // link the accessory to your platform
-        this.api.registerPlatformAccessories(PLUGIN_NAME, PLATFORM_NAME, [accessory]);
+        this.api.registerPlatformAccessories(PLUGIN_NAME, PLATFORM_NAME, [
+          newAaccessory,
+        ]);
       }
+    }
+  }
+
+  getBlasterByUniqueId(_uniqueId: string) {
+    const found = this.blasters.find(
+      ({ config: { uniqueId } }) => uniqueId === _uniqueId
+    );
+
+    if (!found) {
+      throw new Error(`Could not find blaster with uniqueId "${_uniqueId}"`);
+    } else {
+      return found;
     }
   }
 }
