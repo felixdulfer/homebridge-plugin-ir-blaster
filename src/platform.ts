@@ -46,6 +46,7 @@ export class ExampleHomebridgePlatform implements DynamicPlatformPlugin {
   public readonly blasters: IrBlaster[] = [];
   public readonly accessories: PlatformAccessory<{
     irBlaster: IrBlaster;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     commands: any;
   }>[] = [];
 
@@ -66,7 +67,11 @@ export class ExampleHomebridgePlatform implements DynamicPlatformPlugin {
     });
   }
 
-  configureAccessory(accessory: PlatformAccessory<any>) {
+  configureAccessory(
+    accessory: PlatformAccessory<
+      ILightbulbAccessoryContext | IFanAccessoryContext
+    >
+  ) {
     this.log.info('Loading accessory from cache:', accessory.displayName);
     this.accessories.push(accessory);
   }
