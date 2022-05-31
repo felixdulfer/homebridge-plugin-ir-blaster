@@ -12,6 +12,50 @@ Currently supports a Lightbulb and a Fan with 3 speeds. The goal for this projec
 
 This repo is based on [Homebridge Plugin Template](https://github.com/homebridge/homebridge-plugin-template/generate).
 
+## Config Example
+
+```json
+{
+  "platform": "IRBlasterHomebridgePlugin",
+  "name": "IRBlasterHomebridgePlugin",
+  "blasters": [
+    {
+      "displayName": "Master Bedroom",
+      "uniqueId": "master-bedroom-blaster-prod",
+      "address": "192.168.226.121"
+    }
+  ],
+  "accessoires": [
+    {
+      "displayName": "Master Bedroom Fan Light",
+      "uniqueId": "master-bedroom-fan-light",
+      "type": "Lightbulb",
+      "blaster": {
+        "uniqueId": "master-bedroom-blaster-prod"
+      },
+      "commands": {
+        "on": "1214, 414, 1204, ...",
+        "off": "1214, 420, 1194, ..."
+      }
+    },
+    {
+      "displayName": "Master Bedroom Fan Speed",
+      "uniqueId": "master-bedroom-fan-speed",
+      "type": "Fan",
+      "blaster": {
+        "uniqueId": "master-bedroom-blaster-prod"
+      },
+      "commands": {
+        "off": "1240, 428, 1182, ...",
+        "speed1": "1250, 446, 1158, ...",
+        "speed2": "1244, 462, 1150, ...",
+        "speed3": "1248, 386, 1192, ..."
+      }
+    }
+  ]
+}
+```
+
 ## Setup Development Environment
 
 To develop Homebridge plugins you must have Node.js 12 or later installed, and a modern code editor such as [VS Code](https://code.visualstudio.com/). This plugin template uses [TypeScript](https://www.typescriptlang.org/) to make development easier and comes with pre-configured settings for [VS Code](https://code.visualstudio.com/) and ESLint. If you are using VS Code install these extensions:
