@@ -97,3 +97,4 @@ sudo npm install -g homebridge-plugin-ir-blaster@beta
 - [ ] Add tests.
 - [ ] Replace `ping` dependency for a HEAD request.
 - [ ] Add docs to hardware design and firmware.
+- [ ] Add a UI for interactively setting IR codes (seems to be outside of the scope of the config schema).
