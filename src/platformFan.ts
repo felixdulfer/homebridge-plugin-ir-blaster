@@ -10,9 +10,9 @@ export interface IFanAccessoryCommands {
   speed3: string;
 }
 
-export interface FanAccessoryConfig {
+export interface FanAccessoryConfig
+  extends Pick<PlatformAccessory, 'displayName'> {
   uniqueId: string;
-  displayName: string;
   blaster: { uniqueId: string };
   type: 'Fan';
   commands: IFanAccessoryCommands;

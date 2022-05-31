@@ -11,7 +11,6 @@ export interface ILightbulbAccessoryCommands {
 export interface LightbulbAccessoryConfig
   extends Pick<PlatformAccessory, 'displayName'> {
   uniqueId: string;
-  displayName: string;
   blaster: { uniqueId: string };
   type: 'Lightbulb';
   commands: ILightbulbAccessoryCommands;
