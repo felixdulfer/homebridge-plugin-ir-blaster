@@ -65,57 +65,33 @@ You can now start customising the plugin template to suit your requirements.
 - [`src/platformFan.ts`](./src/platformFan.ts) - Fan Accessory logic.
 - [`config.schema.json`](./config.schema.json) - Configuration schema for Homebridge UI. See the [Plugin Config Schema Documentation](https://developers.homebridge.io/#/config-schema).
 
-## Versioning Your Plugin
+More documentation on Homebridge API: https://developers.homebridge.io.
 
-Given a version number `MAJOR`.`MINOR`.`PATCH`, such as `1.4.3`, increment the:
+## Publish Plugin
 
-1. **MAJOR** version when you make breaking changes to your plugin,
-2. **MINOR** version when you add functionality in a backwards compatible manner, and
-3. **PATCH** version when you make backwards compatible bug fixes.
+The easiest way to publish is through [`np`](https://github.com/sindresorhus/np#readme):
 
-You can use the `npm version` command to help you with this:
-
-```bash
-# major update / breaking changes
-npm version major
-
-# minor update / new features
-npm version update
-
-# patch / bugfixes
-npm version patch
+```console
+npx -y np
 ```
 
-## Publish Package
-
-When you are ready to publish your plugin to [npm](https://www.npmjs.com/), make sure you have removed the `private` attribute from the [`package.json`](./package.json) file then run:
-
-```
-npm publish
-```
-
-If you are publishing a scoped plugin, i.e. `@username/homebridge-xxx` you will need to add `--access=public` to command the first time you publish.
-
-#### Publishing Beta Versions
+### Publishing Beta Versions
 
 You can publish _beta_ versions of your plugin for other users to test before you release it to everyone.
 
-```bash
-# create a new pre-release version (eg. 2.1.0-beta.1)
-npm version prepatch --preid beta
-
-# publsh to @beta
-npm publish --tag=beta
+```console
+npx -y np --tag=beta
 ```
 
 Users can then install the _beta_ version by appending `@beta` to the install command, for example:
 
-```
-sudo npm install -g homebridge-example-plugin@beta
+```console
+sudo npm install -g homebridge-plugin-ir-blaster@beta
 ```
 
 ## To-Do
 
-- [ ] Fix config schema
-- [ ] Update publish docs
-- [ ] Add tests
+- [ ] Fix config schema.
+- [ ] Add tests.
+- [ ] Replace `ping` dependency for a HEAD request.
+- [ ] Add docs to hardware design and firmware.
