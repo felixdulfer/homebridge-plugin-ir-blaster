@@ -6,7 +6,7 @@
 
 # Homebridge Platform Plugin IR Blaster
 
-Sends signals to custom built IR Blaster.
+Sends signals to a modified Tyua IR Blaster, running a [custom firmware](https://gitco.re/HomeAutomation/ir-blaster).
 
 Currently supports a Lightbulb and a Fan with 3 speeds. The goal for this project is to support a wider range of Homebridge/Homekit supported devices, as well as some kind of mapping to generic stateful/stateless buttons. For example; a generic button to turn on/off a receiver (which Homekit has no support for).
 
