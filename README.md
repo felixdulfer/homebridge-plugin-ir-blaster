@@ -8,6 +8,8 @@
 
 Sends signals to custom built IR Blaster.
 
+Currently supports a Lightbulb and a Fan with 3 speeds. The goal for this project is to support a wider range of Homebridge/Homekit supported devices, as well as some kind of mapping to generic stateful/stateless buttons. For example; a generic button to turn on/off a receiver (which Homekit has no support for).
+
 This repo is based on [Homebridge Plugin Template](https://github.com/homebridge/homebridge-plugin-template/generate).
 
 ## Setup Development Environment
