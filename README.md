@@ -113,3 +113,9 @@ Users can then install the _beta_ version by appending `@beta` to the install co
 ```
 sudo npm install -g homebridge-example-plugin@beta
 ```
+
+## To-Do
+
+- [ ] Fix config schema
+- [ ] Update publish docs
+- [ ] Add tests
