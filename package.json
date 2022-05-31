@@ -1,7 +1,7 @@
 {
   "displayName": "Homebridge Plug-in IR Blaster",
   "name": "@felixdulfer/homebridge-plugin-ir-blaster",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "Homebridge plug-in that transmits IR signals through a custom IR board.",
   "license": "Apache-2.0",
   "repository": {
